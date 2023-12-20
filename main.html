@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+       <script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/2.4.0/luxon.min.js" integrity="sha512-v1zUTZ9zv9Wb2scL/ANxXM6m7yegm/W5SN8SRHNFADdZIuSFFkrEBjNxO803DdFkjoCcJ88g1WHRVlLN6K/O1A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+      <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.2.4/dist/js/tabulator.min.js"></script>
+  </head>
+  <body>
+    		<section>
+                  <div id="example-table"></div>
+								</section>
+<script>
+        const elements = {}
+        document.addEventListener("DOMContentLoaded",pageLoad)
+
+        function pageLoad(){
+          elements.alerts = document.getElementById("alerts")
+          elements.search = document.getElementById("search")
+
+          elements.search.addEventListener("input", searchData)
+          loadData()
+        }
+        function loadData(){
+          google.script.run
+          .withSuccessHandler((jsdata) => {
+             // if data succesfully returned
+            elements.table = new Tabulator("#example-table", {
+                data:jsdata,           //load row data from array
+                layout:"fitColumns",      //fit columns to width of table
+                responsiveLayout:"hide",  //hide columns that don't fit on the table
+                addRowPos:"top",          //when adding a new row, add it to the top of the table
+                history:true,             //allow undo and redo actions on the table
+                pagination:"local",       //paginate the data
+                paginationSize:5,         //allow 5 rows per page of data
+                paginationCounter:"rows", //display count of paginated rows in footer
+                movableColumns:true,      //allow column order to be changed
+                initialSort:[             //set the initial sort order of the data
+                    {column:"name", dir:"asc"},
+                ],
+                columnDefaults:{
+                    tooltip:true,         //show tool tips on cells
+                },
+                columns:[                 //define the table columns
+                    {title:"ID", field:"ID", width:100, editor:"input"},
+                    {title:"Email", field:"email", width:200, editor:"input"},
+                    {title:"field", field:"field", width:150, editor:"input"},
+                    {title:"Tanggal Commit", field:"tanggal", width:130, sorter:"date", hozAlign:"center"},
+                    {title:"github", field:"github", width:100, editor:"input"},
+                    {title:"progress", field:"progress", width:100, formatter:"progress", editor:"true"},
+                ],
+            })
+              elements.table.on("cellEdited", function(cell){
+                const id = cell._cell.row.data.ID
+                const val = cell._cell.value
+                const field = cell._cell.column.field
+
+                if(field === "field"){
+                  google.script.run.editfield({id: id, val: val})
+                }
+                if(field === "email"){
+                  google.script.run.editemail({id: id, val: val})
+                }
+              });
+              // end if data succesfully returned
+            })
+            .withFailureHandler((er) =>{
+              }) 
+              .getData()
+        }
+  </script>
+    </body>
+</html>
